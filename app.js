@@ -1,85 +1,92 @@
 const canvas = document.querySelector("canvas");
-const ctx = canvas.getContext("2d");
-const backgroundColor = "#f6f6f6";
+const context = canvas.getContext("2d");
+
+canvas.width = WIDTH;
+canvas.height = HEIGHT;
 
 class Grid {
   constructor(size, rows, cols) {
-    this.size = size;
+    this.size = WIDTH;
     this.rows = rows;
     this.cols = cols;
     this.grid = [];
   }
 
   setup() {
-    for (let r = 0; r < this.rows; r++) {
-      const row = [];
-      for (let c = 0; c < this.cols; c++) {
-        const cell = new Cell(this.size, this.grid, this.rows, this.cols, r, c);
-        row.push(cell);
+    for (let i = 0; i < this.rows; i++) {
+      for (let j = 0; j < this.cols; j++) {
+        const cell = new Cell(i, j, this.rows, this.cols);
+        this.grid.push(cell);
       }
-      this.grid.push(row);
+    }
+    // PLACE RANDOM PIXEL PLACES
+    for (let index = 0; index < 500; index++) {
+      const rand = Math.floor(Math.random() * 2499);
+      this.grid[rand].state = 1;
     }
   }
 
   draw() {
-    canvas.width = this.size;
-    canvas.height = this.size;
-    canvas.style.background = backgroundColor;
+    for (let i = 0; i < this.rows; i++) {
+      for (let j = 0; j < this.cols; j++) {
+        this.grid[this.rows * i + j].drawCell();
+      }
+    }
+  }
 
-    this.grid.forEach((row) => {
-      row.forEach((cell) => {
-        cell.drawCell();
-      });
-    });
+  updateCells() {
+    const visited = [];
+    for (let i = 0; i < this.rows - 1; i++) {
+      for (let j = 0; j < this.cols; j++) {
+        const below = this.grid[this.rows * (i + 1) + j];
+        const current = this.grid[this.rows * i + j];
 
-    // this.grid[10][10].color = "red";
+        if (current.state && !below.state && !visited.includes(current)) {
+          visited.push(below);
+          this.swapeState(below, current);
+        }
+      }
+    }
+  }
 
-    requestAnimationFrame(() => {
-      this.draw();
-    });
+  swapeState(cell1, cell2) {
+    const temp = cell1.state;
+    cell1.state = cell2.state;
+    cell2.state = temp;
   }
 }
 
 class Cell {
-  constructor(parentSize, parentGrid, rows, cols, rowPos, colPos) {
-    this.parentSize = parentSize;
-    this.parentGrid = parentGrid;
+  constructor(i, j, rows, cols) {
     this.rows = rows;
     this.cols = cols;
-    this.rowPos = rowPos;
-    this.colPos = colPos;
-    this.size = this.parentSize / this.cols;
-    this.color = backgroundColor;
-  }
-
-  setColor() {
-    this.color = "red";
+    this.posX = j;
+    this.posY = i;
+    this.size = WIDTH / this.cols;
+    this.state = 0;
   }
 
   drawCell() {
-    const x = this.rowPos * this.size;
-    const y = this.colPos * this.size;
+    const x = this.size * this.posX;
+    const y = this.size * this.posY;
+    const size = this.size;
 
-    ctx.strokeStyle = "#fff";
-    ctx.fillStyle = this.color;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.rect(x, y, this.size, this.size);
-    ctx.fill();
-    ctx.stroke();
-
-    // ctx.fillRect(x, y, this.size, this.size);
+    context.fillStyle = this.state ? "#fff" : "#000";
+    context.fillRect(x, y, size, size);
   }
 }
 
-const grid = new Grid(500, 20, 20);
-grid.setup();
-grid.draw();
+const myGrid = new Grid(WIDTH, 50, 50);
+myGrid.setup();
+myGrid.draw();
 
-canvas.addEventListener("mousedown", (e) => {
-  const cellX = Math.floor(e.offsetX / 25);
-  const cellY = Math.floor(e.offsetY / 25);
+const loop = () => {
+  myGrid.updateCells();
+  myGrid.draw();
 
-  grid.grid[cellX][cellY].setColor();
-  console.log(cellX, cellY);
-});
+  requestAnimationFrame(() => {
+    loop();
+  });
+};
+
+loop();
