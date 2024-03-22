@@ -32,6 +32,11 @@ class Grid {
         this.grid[this.rows * i + j].drawCell();
       }
     }
+
+    const size = this.size / this.rows;
+    if (mouse.box) {
+      context.fillRect(mouse.box.gx * size, mouse.box.gy * size, size, size);
+    }
   }
 
   isBelowEmpty(i, j) {
@@ -102,6 +107,26 @@ class Cell {
   }
 }
 
+const mouse = {};
+canvas.addEventListener("mousemove", (e) => {
+  mouse.x = e.pageX;
+  mouse.y = e.pageY;
+  updateMouse();
+});
+
+const updateMouse = () => {
+  if (!mouse.box) {
+    mouse.box = {};
+  }
+
+  mouse.box.x = mouse.x - (innerWidth - WIDTH) / 2;
+  mouse.box.y = mouse.y - (innerHeight - WIDTH) / 2;
+  mouse.box.nx = mouse.box.x / WIDTH;
+  mouse.box.ny = mouse.box.y / HEIGHT;
+  mouse.box.gx = Math.floor(mouse.box.nx * 50);
+  mouse.box.gy = Math.floor(mouse.box.ny * 50);
+};
+
 const myGrid = new Grid(WIDTH, 50, 50);
 myGrid.setup();
 myGrid.draw();
@@ -109,7 +134,6 @@ myGrid.draw();
 const loop = () => {
   myGrid.updateCells();
   myGrid.draw();
-
   requestAnimationFrame(() => {
     loop();
   });
