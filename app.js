@@ -170,11 +170,11 @@ const updateMouse = () => {
   mouse.box.gy = Math.floor(mouse.box.ny * GRID_ROWS);
 };
 
-const getRandomArbitrary = (min, max) => {
+function getRandomArbitrary(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
-};
-const constrain = (value, min, max) => {
+}
+function constrain(value, min, max) {
   return Math.min(Math.max(value, min), max);
-};
+}
 
 loop();
