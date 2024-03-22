@@ -19,11 +19,15 @@ class Grid {
         this.grid.push(cell);
       }
     }
-    // PLACE RANDOM PIXEL PLACES
-    for (let index = 0; index < 500; index++) {
+    // PLACE RANDOM PIXEL
+    for (let index = 0; index < 100; index++) {
       const rand = Math.floor(Math.random() * 2499);
       this.grid[rand].state = 1;
     }
+  }
+
+  setPixel(i, j) {
+    this.grid[this.rows * j + i].state = 1;
   }
 
   draw() {
@@ -68,6 +72,11 @@ class Grid {
           if (isbEmpt) {
             visited.push(below);
             this.swapeState(below, current);
+          } else if (isblEmpty && isbrEmpty) {
+            const rand = Math.floor(Math.random() * 2);
+            const cell = rand ? belowLeft : belowRight;
+            visited.push(cell);
+            this.swapeState(cell, current);
           } else if (isblEmpty) {
             visited.push(belowLeft);
             this.swapeState(belowLeft, current);
@@ -112,6 +121,10 @@ canvas.addEventListener("mousemove", (e) => {
   mouse.x = e.pageX;
   mouse.y = e.pageY;
   updateMouse();
+});
+
+canvas.addEventListener("mousedown", (e) => {
+  myGrid.setPixel(mouse.box.gx, mouse.box.gy);
 });
 
 const updateMouse = () => {
