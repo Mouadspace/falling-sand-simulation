@@ -22,8 +22,8 @@ class Grid {
     // PLACE RANDOM PIXEL
     for (let index = 0; index < 100; index++) {
       //BUG : 10 + shift, Invisible Interaction
-      const i = Math.floor(Math.random() * 50);
-      const j = Math.floor(Math.random() * 50);
+      const i = Math.floor(Math.random() * GRID_ROWS);
+      const j = Math.floor(Math.random() * GRID_COLS);
       const rand = this.cols * i + j;
       this.grid[rand].state = 1;
     }
@@ -107,6 +107,7 @@ class Cell {
     this.posY = i;
     this.size = WIDTH / this.cols;
     this.state = 0;
+    this.color = this.varyColor(CELL_COLOR);
   }
 
   drawCell() {
@@ -114,14 +115,23 @@ class Cell {
     const y = this.size * this.posY;
     const size = this.size;
 
-    context.fillStyle = this.state ? "#fff" : "#000";
+    context.fillStyle = this.state ? this.color : BG_COLOR;
     context.fillRect(x, y, size, size);
   }
+  varyColor = (color) => {
+    const rgb = hex2RGB(color);
+    let [h, s, l] = RGBToHSL(rgb);
+    s = s + getRandomArbitrary(-20, 0);
+    s = constrain(s, 0, 100);
+
+    l = l + getRandomArbitrary(-10, 10);
+    l = constrain(l, 0, 100);
+    return hsl2RGB(h, s, l);
+  };
 }
 
 let startClick = false;
 let onMove = false;
-
 const mouse = {};
 canvas.addEventListener("mousemove", (e) => {
   mouse.x = e.pageX;
@@ -131,20 +141,7 @@ canvas.addEventListener("mousemove", (e) => {
 canvas.addEventListener("mousedown", (e) => (startClick = true));
 canvas.addEventListener("mouseup", (e) => (startClick = false));
 
-const updateMouse = () => {
-  if (!mouse.box) {
-    mouse.box = {};
-  }
-
-  mouse.box.x = mouse.x - (innerWidth - WIDTH) / 2;
-  mouse.box.y = mouse.y - (innerHeight - WIDTH) / 2;
-  mouse.box.nx = mouse.box.x / WIDTH;
-  mouse.box.ny = mouse.box.y / HEIGHT;
-  mouse.box.gx = Math.floor(mouse.box.nx * 50);
-  mouse.box.gy = Math.floor(mouse.box.ny * 50);
-};
-
-const myGrid = new Grid(WIDTH, 50, 50);
+const myGrid = new Grid(WIDTH, GRID_ROWS, GRID_COLS);
 myGrid.setup();
 myGrid.draw();
 
@@ -159,6 +156,25 @@ const loop = () => {
   requestAnimationFrame(() => {
     loop();
   });
+};
+const updateMouse = () => {
+  if (!mouse.box) {
+    mouse.box = {};
+  }
+
+  mouse.box.x = mouse.x - (innerWidth - WIDTH) / 2;
+  mouse.box.y = mouse.y - (innerHeight - WIDTH) / 2;
+  mouse.box.nx = mouse.box.x / WIDTH;
+  mouse.box.ny = mouse.box.y / HEIGHT;
+  mouse.box.gx = Math.floor(mouse.box.nx * GRID_ROWS);
+  mouse.box.gy = Math.floor(mouse.box.ny * GRID_ROWS);
+};
+
+const getRandomArbitrary = (min, max) => {
+  return Math.floor(Math.random() * (max - min) + min);
+};
+const constrain = (value, min, max) => {
+  return Math.min(Math.max(value, min), max);
 };
 
 loop();
