@@ -21,7 +21,10 @@ class Grid {
     }
     // PLACE RANDOM PIXEL
     for (let index = 0; index < 100; index++) {
-      const rand = Math.floor(Math.random() * 2499);
+      //BUG : 10 + shift, Invisible Interaction
+      const i = Math.floor(Math.random() * 50);
+      const j = Math.floor(Math.random() * 50);
+      const rand = this.cols * i + j;
       this.grid[rand].state = 1;
     }
   }
@@ -116,16 +119,17 @@ class Cell {
   }
 }
 
+let startClick = false;
+let onMove = false;
+
 const mouse = {};
 canvas.addEventListener("mousemove", (e) => {
   mouse.x = e.pageX;
   mouse.y = e.pageY;
   updateMouse();
 });
-
-canvas.addEventListener("mousedown", (e) => {
-  myGrid.setPixel(mouse.box.gx, mouse.box.gy);
-});
+canvas.addEventListener("mousedown", (e) => (startClick = true));
+canvas.addEventListener("mouseup", (e) => (startClick = false));
 
 const updateMouse = () => {
   if (!mouse.box) {
@@ -147,6 +151,11 @@ myGrid.draw();
 const loop = () => {
   myGrid.updateCells();
   myGrid.draw();
+
+  if (startClick) {
+    myGrid.setPixel(mouse.box.gx, mouse.box.gy);
+  }
+
   requestAnimationFrame(() => {
     loop();
   });
