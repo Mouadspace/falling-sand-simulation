@@ -34,16 +34,42 @@ class Grid {
     }
   }
 
+  isBelowEmpty(i, j) {
+    return this.grid[this.rows * (i + 1) + j].state === 0;
+  }
+  isBelowLeftEmpty(i, j) {
+    return j > 0 && this.grid[this.rows * (i + 1) + j - 1].state === 0;
+  }
+  isBelowRightEmpty(i, j) {
+    return (
+      j < this.cols - 1 && this.grid[this.rows * (i + 1) + j + 1].state === 0
+    );
+  }
+
   updateCells() {
     const visited = [];
     for (let i = 0; i < this.rows - 1; i++) {
       for (let j = 0; j < this.cols; j++) {
         const below = this.grid[this.rows * (i + 1) + j];
+        const belowLeft = this.grid[this.rows * (i + 1) + j - 1];
+        const belowRight = this.grid[this.rows * (i + 1) + j + 1];
         const current = this.grid[this.rows * i + j];
 
-        if (current.state && !below.state && !visited.includes(current)) {
-          visited.push(below);
-          this.swapeState(below, current);
+        const isbEmpt = this.isBelowEmpty(i, j);
+        const isblEmpty = this.isBelowLeftEmpty(i, j);
+        const isbrEmpty = this.isBelowRightEmpty(i, j);
+
+        if (current.state && !visited.includes(current)) {
+          if (isbEmpt) {
+            visited.push(below);
+            this.swapeState(below, current);
+          } else if (isblEmpty) {
+            visited.push(belowLeft);
+            this.swapeState(belowLeft, current);
+          } else if (isbrEmpty) {
+            visited.push(belowRight);
+            this.swapeState(belowRight, current);
+          }
         }
       }
     }
