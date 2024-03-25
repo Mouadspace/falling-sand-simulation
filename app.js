@@ -42,7 +42,22 @@ class Grid {
 
     const size = this.size / this.rows;
     if (mouse.box) {
-      context.fillRect(mouse.box.gx * size, mouse.box.gy * size, size, size);
+      const colors = ["#d09e3777", "#dabb7c44"];
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+          if (i == 0 || j == 0) {
+            context.fillStyle = colors[0];
+          } else {
+            context.fillStyle = colors[1];
+          }
+          context.fillRect(
+            (mouse.box.gx + i) * size,
+            (mouse.box.gy + j) * size,
+            size,
+            size
+          );
+        }
+      }
     }
   }
 
@@ -107,7 +122,7 @@ class Cell {
     this.posY = i;
     this.size = WIDTH / this.cols;
     this.state = 0;
-    this.color = this.varyColor(CELL_COLOR);
+    this.color = varyColor(CELL_COLOR);
   }
 
   drawCell() {
@@ -118,16 +133,6 @@ class Cell {
     context.fillStyle = this.state ? this.color : BG_COLOR;
     context.fillRect(x, y, size, size);
   }
-  varyColor = (color) => {
-    const rgb = hex2RGB(color);
-    let [h, s, l] = RGBToHSL(rgb);
-    s = s + getRandomArbitrary(-20, 0);
-    s = constrain(s, 0, 100);
-
-    l = l + getRandomArbitrary(-10, 10);
-    l = constrain(l, 0, 100);
-    return hsl2RGB(h, s, l);
-  };
 }
 
 let startClick = false;
@@ -175,6 +180,16 @@ function getRandomArbitrary(min, max) {
 }
 function constrain(value, min, max) {
   return Math.min(Math.max(value, min), max);
+}
+function varyColor(color) {
+  const rgb = hex2RGB(color);
+  let [h, s, l] = RGBToHSL(rgb);
+  s = s + getRandomArbitrary(-20, 0);
+  s = constrain(s, 0, 100);
+
+  l = l + getRandomArbitrary(-10, 10);
+  l = constrain(l, 0, 100);
+  return hsl2RGB(h, s, l);
 }
 
 loop();
